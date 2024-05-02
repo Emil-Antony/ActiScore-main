@@ -1,0 +1,179 @@
+from django.shortcuts import render,redirect
+from django.http import HttpResponse
+from django.template import loader
+from .forms import CustomUserCreationForm,LoginForm, AddActivity
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from .models import Teacher, Student, StudentRequest, Activity, Subcategory, Level
+from django.contrib.auth.decorators import login_required,permission_required
+from django.db import IntegrityError
+from .decorators import unauthenticated_user, authenticated_student, authenticated_teacher
+from django.db.models import Sum
+
+class DuplicateRegNoError(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+@unauthenticated_user
+def homepag(request):
+    template= loader.get_template("Home.html")
+    return HttpResponse(template.render())
+
+@unauthenticated_user
+def registervw(request):
+    msg = None
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            msg = 'User Created Successfully'
+            regno = form.cleaned_data.get('regno')
+            batch = form.cleaned_data.get('batch')
+            try:
+                teacher = Teacher.objects.get(batch=batch)
+                existing_student = Student.objects.filter(regno=regno).first()
+                if existing_student:
+                    raise DuplicateRegNoError('A student with this registration number already exists.')
+                user.save()
+                student = StudentRequest.objects.create(name=user.username,user=user,batch=batch,regno=regno,teacher=teacher)
+                student.save()
+                return redirect('loginpg')  # Redirect to a success page
+            except Teacher.DoesNotExist:
+                msg= 'the batch teacher has not been assigned'
+                form = CustomUserCreationForm(initial={'username': '','regno': '','batch': ''})
+            except IntegrityError:
+                msg = 'Registration number already exists'
+                form = CustomUserCreationForm(initial={'username': '','regno': '','batch': ''})
+            except DuplicateRegNoError as e:
+                msg = str(e)
+                form = CustomUserCreationForm(initial={'username': '','regno': '','batch': ''})
+        else:
+            msg = 'Form is invalid'
+    else:
+        form = CustomUserCreationForm(initial={'username': '','regno': ''})
+    return render(request, 'register.html', {'form': form, 'msg':msg})
+
+@unauthenticated_user
+def loginvw(request):
+    msg= None
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                    if user.verified == False:
+                        msg='Account has not been approved yet'
+                    else:
+                        login(request, user)
+                        if user.roles == 'teacher':
+                            return redirect('teachvw')
+                        elif user.roles == 'student':
+                            return redirect('studvw')
+            else:
+                msg="Invalid User or password"
+        else:
+            msg = 'Form is Invalid'
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form, 'msg':msg})
+
+@login_required(login_url='/login')
+def logoutvw(request):
+    logout(request)
+    request.session.flush() 
+    messages.success(request, ('Logged out successfully'))
+    return redirect('loginpg')
+
+@authenticated_teacher
+@login_required(login_url='/login')
+def teachvw(request):
+    msg=None
+    teacher=request.user.teacher
+    teachuser=teacher.name
+    studreq = [i for i in StudentRequest.objects.all() if i.teacher==teacher]
+    students = [i for i in Student.objects.all() if i.teacher == teacher]
+    return render(request,'teacherview.html', {'msg':msg, 'students':students,'teacheruser':teachuser,'studreq':studreq})
+
+@authenticated_teacher
+@permission_required('homepg.add_student', raise_exception=True)
+@login_required(login_url='/login')
+def addstudent(request,id):
+    stud_request = StudentRequest.objects.get(id=id)
+    student = Student(
+        name=stud_request.name,
+        regno=stud_request.regno,
+        batch=stud_request.batch,
+        points=stud_request.points,
+        teacher=stud_request.teacher,
+        user=stud_request.user
+    )
+    student.save()
+    user= stud_request.user
+    user.verified=True
+    user.save()
+    stud_request.delete()
+    return redirect('teachvw')
+
+@authenticated_teacher
+@permission_required('homepg.delete_studentrequest', raise_exception=True)
+@login_required(login_url='/login')
+def deletestudent(request,id):
+    stud_request = StudentRequest.objects.get(id=id)
+    studuser = stud_request.user
+    studuser.delete()
+    return redirect('teachvw')
+
+@authenticated_student
+@login_required(login_url='/login')
+def studvw(request):
+    studuser = request.user
+    student = Student.objects.get(user=studuser)
+    # certificates = [i for i in Certificate.objects.all() if i.student == student]
+    return render(request,'studentview.html',{'student':student})
+
+@authenticated_student
+@login_required(login_url='/login')
+def upcert(request):
+    msg=None
+    if request.method == 'POST':
+        form= AddActivity(request.POST,request.FILES)
+        if form.is_valid():
+            print("success")
+            activityreq = form.save(commit=False)
+            curruser = request.user
+            currstudent = Student.objects.get(user=curruser)
+            subc = activityreq.level.subcategory
+            print(subc.name)
+            
+            student_activities = Activity.objects.filter(student=currstudent, level__subcategory=subc)
+
+            total_points = student_activities.aggregate(total_points=Sum('points_obtained'))['total_points'] or 0
+
+            print("Total points obtained in the subcategory:", total_points)
+            print("Max points allowed :", subc.max)
+            if subc.max > total_points:
+                activityreq.student= currstudent
+                activityreq.save()
+                msg= "successfully uploaded"
+            else:
+                msg= "reached limit for this activity"
+        else:
+            print(form.errors)
+            msg='Invalid Entry'
+            print("failed")
+    else:
+        form = AddActivity()
+    return render(request,'studentcert.html',{'msg':msg, 'form': form})
+
+def load_sub(request):
+    category_id = request.GET.get('category_id')
+    subcategories = Subcategory.objects.filter(category_id=category_id)
+    return render(request, 'subcategory_choices.html', {'subcategories': subcategories})
+
+def load_levels(request):
+    subcategory_id = request.GET.get('subcategory_id')
+    levels = Level.objects.filter(subcategory_id=subcategory_id)
+    return render(request, 'level_choices.html', {'levels': levels})

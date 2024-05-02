@@ -1,0 +1,238 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.main{
+    width: 100vw;
+    background:linear-gradient(to right,rgba(255,255,255,0)30%,rgba(255,255,255,0)), url(homebg2.jpg);
+    background-position: center;
+    background-size: cover;
+    height: 100vh;
+}
+
+.navbar{
+    width: 100vw;
+    background-color: #1d1f21;
+    height: 70px;
+    margin:auto;
+    float: left;
+    box-shadow: 3px 1px 4px black;
+}
+
+.icon{
+    margin-top: 10px;
+    margin-left: 20px;
+    width: 140px;
+    height: 45px;
+    float:left;
+    border-left: 2px solid white;
+    border-radius: 16px;
+    border-bottom: 2px solid white;
+    border-color: #fff;
+
+}
+.icon:hover{
+    border-left: 3px solid white;
+    border-bottom: 3px solid white;
+    transition: 0.1s ease;
+}
+
+.logo{
+    color: #fff;
+    font-size: 25px;
+    font-family: 'Lucida Sans';
+    padding-left: 10px;
+    padding-top: 10px;
+   
+}
+.logo a{
+    text-decoration: none;
+    color: #fff;
+}
+
+.menu{
+    float: right;
+    margin-right: 30px;
+}
+
+ul {
+    float: right;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+ul li{
+    list-style: none;
+    font-family:Arial;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-right: 30px;
+
+    
+}
+
+ul li a{
+    text-decoration: none;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+
+    width:120px;
+    height: 30px;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+    padding-top: 10px;
+    font-size: 20px;
+    transition: 0.2s ease;
+    padding-bottom: 2%
+}
+ul li a:hover{
+    color: black;
+    border-color: white;
+    font-size: 22px;
+    transition: .2s ease;
+    background-color: #fff;
+}
+
+.formw {
+    background-color: #3a3b3c;
+    border: 3px solid black;
+    border-radius: 5px;
+    padding: 20px;
+    position: relative;
+    top: 6%;
+    left: 34%;
+    height:800px;
+    width: 600px;
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 10px;
+
+}
+
+.regbar h2{
+    font-size: 40px;
+    text-align: left;
+    font-family: Helvetica;
+    padding-bottom: 20px;
+    padding-left: 50px;
+    padding-top: 10px;
+    position: relative;
+
+    left: 60px;
+}
+.formw hr{
+    background-color: #f0f0f0;
+    height: 1px;
+    border: 0;
+
+    position: relative;
+    top: 5px;
+}
+
+/* Form group styles */
+
+
+label {
+    display: block;
+    font-weight: bold;
+    font-size: 20px;
+    padding-top: 60px;
+    padding-bottom: 20px;
+    padding-left: 30px;
+    color: #ccc;
+    font-family:'Courier New' ;
+}
+
+input[type="text"],
+input[type="password"],
+select {
+    width: calc(100% - 12px);
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 3px;
+    box-sizing: border-box;
+    padding-left: 20px;
+}
+
+button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #57bfff;
+    color: white;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    margin-top: 30px;
+    margin-left: 28%;
+    height: 80px;
+    width: 250px;
+    font-size: 25px;
+    font-weight: bold;
+    transition: 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: black;
+    color: white;
+    border-color: #fff;
+    transition: 0.3s ease;
+}
+
+.form-group4 select {
+    width: calc(100% - 12px);
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 3px;
+    box-sizing: border-box;
+    font-size: 16px; 
+    background-color: #fff; 
+    color: #333; 
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+}
+.form-group4 select:focus{
+    transition: 0.3s ease;
+}
+.form-group4 select option { 
+    padding: 10px;
+    font-size: 16px; 
+    background-color: #fff; 
+    color: #333; 
+    font-weight: bold;
+}
+
+
+
+.form-group1{
+
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.form-group2{
+
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.form-group3{
+
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.form-group4{
+
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+p{
+    text-align:right;
+    margin-top: 30px;
+    font-size: 15px;
+}
