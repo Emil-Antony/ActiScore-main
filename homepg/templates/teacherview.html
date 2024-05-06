@@ -23,12 +23,12 @@
                     </div>
                     <ul class="nav nav-underline nav-fill flex-column mb-sm-auto  align-items-sm-start" id="menu">
                         <li class="nav-item">
-                            <a href="#" class="nav-link text-light active align-middle mb-4 ">
-                            <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-user-group me-3"></i>My Students</span>
+                            <a href="{%url 'teachvw' %}" class="nav-link text-light active align-middle mb-4 ">
+                            <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-user-group me-3"></i>Home Page</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link text-light px-0 align-middle mb-4" >
+                            <a href="{% url 'teach_cert' %}" class="nav-link text-light px-0 align-middle mb-4" >
                              <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-folder-open me-3"></i>Certificates</span> </a>
 
                         </li>
@@ -37,8 +37,8 @@
                          <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-check me-3"></i>Activity approval</span></a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link text-light px-0 align-middle mb-4">
-                             <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-pen-to-square me-3"></i>Update points</span> </a>
+                            <a href="{% url 'update_teacher' %}" class="nav-link text-light px-0 align-middle mb-4">
+                             <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-pen me-3"></i>Update info</span> </a>
                         </li>
                     </ul>
                     <a class="btn btn-light  mx-3 mb-5 px-3 " href="{% url 'logout' %}" role="button"><span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-door-open me-2"></i>LogOut</span></a>
@@ -50,7 +50,7 @@
                 <div class="col g-0">
                     <nav class="navbar sticky-top px-2 py-3" style="background-color:#2196F3;color: #FFFFFF; font-family: Helvetica;">
                         <div class="container-fluid">
-                            <h2 class="d-flex">My Students</h2>
+                            <h2 class="d-flex">Home</h2>
                             <h4 class="d-flex">{{teacheruser}}</h4>
                         </div>
                     </nav>
@@ -164,7 +164,7 @@
     </div>
     <!--grid ends-->
     <!--js scripts-->
-    <script scr="{% static 'teachscript.js' %}"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </body>
 </html>

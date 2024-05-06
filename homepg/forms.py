@@ -63,3 +63,22 @@ class AddActivity(forms.ModelForm):
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'certificate': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'application/pdf'})
         }
+
+class teacherUpdateForm(forms.ModelForm):
+    new_password = forms.CharField(required=False, widget=forms.PasswordInput)
+    confirm_password = forms.CharField(required=False, widget=forms.PasswordInput)
+    name=forms.CharField(required=False,initial='')
+
+    class Meta:
+        model = User
+        fields = ['username', 'name', 'new_password', 'confirm_password']
+
+class studentUpdateForm(forms.ModelForm):
+    new_password = forms.CharField(required=False, widget=forms.PasswordInput)
+    confirm_password = forms.CharField(required=False, widget=forms.PasswordInput)
+    name=forms.CharField(required=False,initial='')
+    regno= forms.CharField(required=False,initial='')
+
+    class Meta:
+        model = User
+        fields = ['username', 'name', 'regno','new_password', 'confirm_password']

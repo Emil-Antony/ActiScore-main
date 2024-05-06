@@ -32,8 +32,8 @@
 
                         </li>
                         <li>
-                            <a href="#" class="nav-link text-light align-justify mb-4 w-100">
-                         <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-clock-rotate-left me-3 "></i>Update History</span></a>
+                            <a href="{% url 'update_student' %}" class="nav-link text-light align-justify mb-4 w-100">
+                         <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-pen me-3"></i>Update info</span></a>
                         </li>
                     </ul>
                     <a class="btn btn-light  mx-3 mb-5 px-3 " href="{% url 'logout' %}" role="button"><span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-door-open me-2"></i>LogOut</span></a>
@@ -61,18 +61,29 @@
                           <a href="#" class="btn btn-primary mx-4"><i class="fa-solid fa-clock-rotate-left p-2 "></i>See Updates</a>
                         </div>
                     </div>
-                    <!-- <div class="card m-4">
-                        <div class="card-header text-bg-info">
-                          <h4>My certificates</h4>
+                    <div class="card m-4">
+                        <div class="card-header text-light d-flex justify-content-between"style="background-color:#2380cd;">
+                            <h4>My Activities</h4>
+                            <div>
+                            <span class="me-2">Sort By:</span>   
+                            <button onclick="sortTable('name') " class="btn btn-light">Name</button>
+                            <button onclick="sortTable('date')" class="btn btn-light">Date</button>
+                            <button onclick="sortTable('points')" class="btn btn-light">Points</button>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <div class="overflow-auto mx-2">
-                            <table class="table">
+                            <div class="overflow-auto mx-2 "    style="max-height: 50vh;">
+                            <table class="table" id="activity-table">
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th  scope="col">Certificate Name</th>
-                                        <th  scope="col">Image</th>
+                                        <th  scope="col"> Name</th>
+                                        <th  scope="col"> Category</th>
+                                        <th  scope="col"> Level</th>
+                                        <th  scope="col"> Date</th>
+                                        <th  scope="col"> Approved status</th>
+                                        <th  scope="col"> Points</th>
+                                        <th  scope="col">Certificate</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -80,21 +91,39 @@
                                         <tr>
                                             <td scope="row">{{ forloop.counter }}</td>
                                             <td >{{ certs.name }}</td>
-                                            <td><img src="{{certs.image.url }}" width="500"></td>
+                                            <td >{{ certs.level.subcategory }}</td>
+                                            <td >{{ certs.level.levelname }}</td>
+                                            <td >{{ certs.end_date }}</td>
+                                            <td >{% if certs.approved_status %}Yes{% else %}No{% endif %}</td>
+                                            <td >{{ certs.points_obtained }}</td>
+                                            <td><a href="{{ certs.certificate.url }}" target="_blank"><div class="btn btn-info text-light my-0 py-0 mx-2"><i class="fa-solid fa-image"></i></div></a></td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
                             </table></div>
                         </div>
-                    </div> -->
-                <!--cards end-->
+                    </div>
+                <!--cards end -->
             </div>
             <!--content end-->
         </div>
     </div>
     <!--grid ends-->
     <!--js scripts-->
-    <script scr="{% static 'teachscript.js' %}"></script>
+    <script>
+    function sortTable(criteria) {
+        // Get the current URL
+        var url = new URL(window.location.href);
+        
+        // Update the sorting parameter
+        url.searchParams.set('sort_by', criteria);
+
+        // Reload the page with the updated URL
+        window.location.href = url.toString();
+    }
+    </script>
+    
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </body>
 </html>

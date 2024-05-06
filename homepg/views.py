@@ -1,7 +1,7 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
 from django.template import loader
-from .forms import CustomUserCreationForm,LoginForm, AddActivity
+from .forms import CustomUserCreationForm,LoginForm, AddActivity, teacherUpdateForm, studentUpdateForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import Teacher, Student, StudentRequest, Activity, Subcategory, Level
@@ -28,7 +28,7 @@ def registervw(request):
         if form.is_valid():
             user = form.save(commit=False)
             msg = 'User Created Successfully'
-            regno = form.cleaned_data.get('regno')
+            regno = form.cleaned_data.get('regno').lower()
             batch = form.cleaned_data.get('batch')
             try:
                 teacher = Teacher.objects.get(batch=batch)
@@ -126,13 +126,90 @@ def deletestudent(request,id):
     studuser.delete()
     return redirect('teachvw')
 
+@authenticated_teacher
+@login_required(login_url='/login')
+def teach_cert(request):
+    teacher = Teacher.objects.get(user=request.user)
+    students = Student.objects.filter(teacher=teacher)
+    teachuser= teacher.name
+    sort_by = request.GET.get('sort_by')
+    if sort_by == 'name':
+        students = students.order_by('name')
+    elif sort_by == 'regno':
+        students = students.order_by('regno')
+    elif sort_by == 'points':
+        students = students.order_by('-points')
+    return render(request, 'teacher_certificates.html', {'students': students ,'teacheruser':teachuser})
+
+@authenticated_teacher
+@login_required(login_url='/login')
+def student_activities(request, student_id):
+    # Retrieve the student's activities
+    student = get_object_or_404(Student, id=student_id)
+    teacher = Teacher.objects.get(user=request.user)
+    teacheruser =teacher.name
+    activities = Activity.objects.filter(student=student,approved_status=True)
+    sort_by = request.GET.get('sort_by')
+    if sort_by == 'name':
+        activities = activities.order_by('name')
+    elif sort_by == 'date':
+        activities = activities.order_by('end_date')
+    elif sort_by == 'points':
+        activities = activities.order_by('-points_obtained')
+    return render(request, 'student_activities.html',{'student': student, 'activities': activities,'teacheruser':teacheruser})
+
+@authenticated_teacher
+@login_required(login_url='/login')
+def update_teacher(request):
+    teacheruser = request.user.username
+    user = request.user
+    msguser=  None
+    msgpass = None
+    msgname = None
+    if request.method == 'POST':
+        form = teacherUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            name = form.cleaned_data.get('name')
+            new_password = form.cleaned_data.get('new_password')
+            confirm_password =  form.cleaned_data.get('confirm_password')
+            
+            if username:
+                user.username = username
+                user.save()
+                msguser="Username updated"
+            if name is not None and name.strip():
+                teacher = Teacher.objects.get(user=request.user)
+                teacher.name = name
+                teacher.save()
+                msgname = 'Name updated'
+            if new_password:
+                if new_password != confirm_password:
+                    msgpass= 'passwords dont match'
+                else:
+                    msgpass = "Password updated"
+                    user.set_password(new_password)
+                    user.save()
+            return redirect('update_teacher')  # Redirect to profile page or any other page
+    else:
+        form = teacherUpdateForm(instance=request.user)
+    return render(request, 'update_teacher.html', {'form': form, 'teacheruser': teacheruser,'msguser':msguser,'msgpass':msgpass,'msgname':msgname})
+
 @authenticated_student
 @login_required(login_url='/login')
 def studvw(request):
     studuser = request.user
     student = Student.objects.get(user=studuser)
-    # certificates = [i for i in Certificate.objects.all() if i.student == student]
-    return render(request,'studentview.html',{'student':student})
+    activities = Activity.objects.filter(student=student)
+    sort_by = request.GET.get('sort_by')
+    if sort_by == 'name':
+        activities = activities.order_by('name')
+    elif sort_by == 'date':
+        activities = activities.order_by('end_date')
+    elif sort_by == 'points':
+        activities = activities.order_by('-points_obtained')
+
+    return render(request,'studentview.html',{'student':student,'certificates':activities})
 
 @authenticated_student
 @login_required(login_url='/login')
@@ -177,3 +254,47 @@ def load_levels(request):
     subcategory_id = request.GET.get('subcategory_id')
     levels = Level.objects.filter(subcategory_id=subcategory_id)
     return render(request, 'level_choices.html', {'levels': levels})
+
+@authenticated_student
+@login_required(login_url='/login')
+def update_student(request):
+    studuser = request.user.username
+    user = request.user
+    msguser=  None
+    msgpass = None
+    msgreg = None
+    msgname = None
+    if request.method == 'POST':
+        form = studentUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            regno = form.cleaned_data.get('regno')
+            name = form.cleaned_data.get('name')
+            new_password = form.cleaned_data.get('new_password')
+            confirm_password =  form.cleaned_data.get('confirm_password')
+            if username:
+                user.username = username
+                user.save()
+                msguser="Username updated"
+            if name is not None and name.strip():
+                student = Student.objects.get(user=request.user)
+                student.name = name
+                student.save()
+                msgname = "Name updated"
+                print("msgname:", msgname)
+            if regno is not None and name.strip():
+                student = Student.objects.get(user=request.user)
+                student.regno = regno
+                student.save()
+                msgreg = 'Reg no updated'
+            if new_password:
+                if new_password != confirm_password:
+                    msgpass= 'passwords dont match'
+                else:
+                    msgpass = "Password updated"
+                    user.set_password(new_password)
+                    user.save() 
+    else:
+        form = studentUpdateForm(instance=request.user)
+    print("msgname:", msgname)
+    return render(request, 'update_student.html', {'form': form, 'student': studuser,'msguser':msguser,'msgreg':msgreg, 'msgpass':msgpass,'msgname':msgname})
