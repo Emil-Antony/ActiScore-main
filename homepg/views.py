@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required,permission_required
 from django.db import IntegrityError
 from .decorators import unauthenticated_user, authenticated_student, authenticated_teacher
 from django.db.models import Sum
+from django.db.models import Q
 
 class DuplicateRegNoError(Exception):
     def __init__(self, message):
@@ -52,7 +53,7 @@ def registervw(request):
             msg = 'Form is invalid'
     else:
         form = CustomUserCreationForm(initial={'username': '','regno': ''})
-    return render(request, 'register.html', {'form': form, 'msg':msg})
+    return render(request, 'Register.html', {'form': form, 'msg':msg})
 
 @unauthenticated_user
 def loginvw(request):
@@ -304,3 +305,26 @@ def update_student(request):
         form = studentUpdateForm(instance=request.user)
     print("msgreg:", msgreg)
     return render(request, 'update_student.html', {'form': form, 'student': studuser,'msguser':msguser,'msgreg':msgreg, 'msgpass':msgpass,'msgname':msgname})
+
+@authenticated_teacher
+@login_required(login_url='/login')
+def approve_activity(request):
+
+    students = Student.objects.filter(teacher=Teacher.objects.get(user=request.user))
+    # Using Q objects so we can use logical OR
+    # See https://docs.djangoproject.com/en/5.0/topics/db/queries/#complex-lookups-with-q-objects
+    qobj = Q(student=students[0])
+
+    for i in students[1:]:
+        qobj = qobj | Q(student=i)
+
+    activities = Activity.objects.filter(qobj, approved_status=False)
+
+    if request.method == 'POST':
+        for activity in activities:
+            if request.POST.get(f"{activity.id}"):
+                activity.approved_status = True
+                activity.save()
+                break
+
+    return render(request, 'approve_activities.html', { 'activities' : activities })

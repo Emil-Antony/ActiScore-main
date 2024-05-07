@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Approve Activities</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	</head>
+	<body>
+		<script>
+			let elements = [];
+		</script>
+		<div class="container mt-5">
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Activity Name</th>
+						<th scope="col">Student</th>
+						<th scope="col">Level</th>
+						<th scope="col"></th>
+					</tr>
+					<tr id="hiddenrow" style="display: none;">
+						<th scope="col">Start date</th>
+						<th scope="col">End date</th>
+						<th scope="col">Certificate</th>
+						<th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for activity in activities %}
+					<!-- https://stackoverflow.com/questions/18519109/how-to-concatenate-a-string-to-a-number-inside-a-template-tag-in-django -->
+					{% with activity.id|stringformat:"s" as activityidstr %}
+					<tr>
+						<th scope="row">{{ activity.name }}</th>
+						<td>{{ activity.student.name }}</td>
+						<td>{{ activity.level }}</td>
+						<td>
+							<button type="button" class="btn btn-primary" id='{{ "activity"|add:activityidstr }}'>View Details</button>
+						</td>
+					</tr>
+					<tr id='{{ "row"|add:activityidstr }}' style="display: none;">
+						<th scope="row">{{ activity.start_date }}</th>
+						<td>{{ activity.end_date }}</td>
+						<td>
+							<a href="{{ activity.certificate.url }}" target="_blank" class="btn btn-primary">See Certificate</a>
+						</td>
+						<td>
+							<button type="submit" name="{{ activityidstr }}" class="btn btn-danger">Approve</button>
+						</td>
+					</tr>
+					<script>
+						elements.push({{ activityidstr }});
+					</script>
+					{% endwith %}
+					{% if loop.last %}
+					{% endif %}
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script>
+			function addEventListeners(elements) {
+				let btnclass = "activity";
+				let rowclass = "row";
+
+				elements.forEach(function(item, index) {
+					// Event listener to show rows extra details when button clicked
+					$(`#${btnclass}${item}`).bind('click', function () {
+						if ($(`#${rowclass}${item}`).css('display') == 'none') {
+							$(`#${rowclass}${item}`).css('display') == '';
+							$(`#hiddenrow`).css('display') == '';
+						} else {
+							$(`#${rowclass}${item}`).css('display') == 'none';
+							$(`#hiddenrow`).css('display') == 'none';
+						}
+					}
+				}
+			}
+
+			addEventListeners(elements);
+		</script>
+	</body>
+</html>

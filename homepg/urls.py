@@ -7,6 +7,7 @@ urlpatterns = [
     path('login',views.loginvw, name='loginpg'),
     path('logout', views.logoutvw, name='logout'),
     path('teacher/My_students',views.teachvw,name="teachvw"),
+    path('teacher/approve_activity', views.approve_activity, name="activityvw"),
     path('addstudent/<int:id>',views.addstudent,name='addstudent'),
     path('deletestudent/<int:id>',views.deletestudent,name='deletestudent'),
     path('student/Dashboard/',views.studvw,name="studvw"),
@@ -17,4 +18,4 @@ urlpatterns = [
     path('view_certificates/<int:student_id>/activities/', views.student_activities, name='student_activities'),
     path('teacher/update_details',views.update_teacher,name='update_teacher'),
     path('student/update_details',views.update_student,name='update_student')
-]   
+]
