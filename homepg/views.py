@@ -4,7 +4,7 @@ from django.template import loader
 from .forms import CustomUserCreationForm,LoginForm, AddActivity, teacherUpdateForm, studentUpdateForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Teacher, Student, StudentRequest, Activity, Subcategory, Level
+from .models import Teacher, Student, StudentRequest, Activity, Subcategory, Level, Notif
 from django.contrib.auth.decorators import login_required,permission_required
 from django.db import IntegrityError
 from .decorators import unauthenticated_user, authenticated_student, authenticated_teacher
@@ -304,3 +304,18 @@ def update_student(request):
         form = studentUpdateForm(instance=request.user)
     print("msgreg:", msgreg)
     return render(request, 'update_student.html', {'form': form, 'student': studuser,'msguser':msguser,'msgreg':msgreg, 'msgpass':msgpass,'msgname':msgname})
+
+@login_required(login_url='/login')
+def view_notif(request):
+    user = request.user
+    notifs = Notif.objects.filter(user=user)
+    if user.roles == 'student':
+        return render(request,'view_notif.html',{'user':user,'notifs':notifs})
+    else:
+        return render(request,'view_notif2.html',{'user':user,'notifs':notifs})
+
+def notif_delete(request,id):
+    notification = get_object_or_404(Notif, id=id)
+    notification.delete()
+    return redirect('view_notif')
+    

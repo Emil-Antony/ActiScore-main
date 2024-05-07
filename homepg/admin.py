@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth import get_user_model
 from django.forms.models import inlineformset_factory
-from .models import CustomUser, Teacher, Student,StudentRequest, Activity, Category, Subcategory ,Level
+from .models import CustomUser, Teacher, Student,StudentRequest, Activity, Category, Subcategory ,Level, Notif
 
 CustomUser = get_user_model()
 
@@ -30,6 +30,7 @@ class CustomUserAdmin(BaseUserAdmin):
     )
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Notif)
 admin.site.register(Teacher)
 admin.site.register(Student)
 admin.site.register(Activity)

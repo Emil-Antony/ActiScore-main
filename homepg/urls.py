@@ -16,5 +16,7 @@ urlpatterns = [
     path('teacher/view_certificates/', views.teach_cert, name='teach_cert'),
     path('view_certificates/<int:student_id>/activities/', views.student_activities, name='student_activities'),
     path('teacher/update_details',views.update_teacher,name='update_teacher'),
-    path('student/update_details',views.update_student,name='update_student')
+    path('student/update_details',views.update_student,name='update_student'),
+    path('/view_notifications/',views.view_notif,name='view_notif'),
+    path('/delete_notifications/<int:id>',views.notif_delete,name='notif_delete')
 ]   
