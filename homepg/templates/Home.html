@@ -22,19 +22,19 @@
     <!--Body Starts-->
     <div class="main">
     <!--nav-->
-    <nav class="navbar sticky-top px-2 py-2 mb-5" style="background-color:#1d1f21;color: #FFFFFF; font-family: Helvetica;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'homepage' %}"><img src="{% static 'logo.png' %}"  alt="bootstrap" width="150" height="50"></a>
-            <ul class="nav text-dark">
-                <li class=" me-2 ">
+    <nav class="navbar sticky-top px-lg-2 py-lg-1 mb-auto" style="background-color:#1d1f21;color: #FFFFFF; font-family: Helvetica;">
+      <div class="container-fluid">
+          <a class="navbar-brand" href="{% url 'homepage' %}"><img src="{% static 'logo.png' %}"  alt="bootstrap" width="150" height="50"></a>
+          <ul class="nav text-dark">
+              <li class=" me-2 ">
                   <a class="nav-link me-3 pe-0 fs-5" href="{% url 'loginpg' %}"><button type="button" class="btn btn-outline-light btn-lg">Log In</button></a>
-                </li>
-                <li class=" me-2">
+              </li>
+              <li class=" me-2">
                   <a class="nav-link me-3 pe-0 fs-5" href="{% url 'register' %}"><button type="button" class="btn btn-outline-light btn-lg">Sign Up</button></a>
-                </li>
-              </ul>
-        </div>
-    </nav>
+              </li>
+          </ul>
+      </div>
+  </nav>
     <!--nav ends-->
     <!--para-->
     <div class="my-5  py-3">
