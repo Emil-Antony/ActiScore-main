@@ -92,7 +92,7 @@ def logoutvw(request):
 def teachvw(request):
     msg=None
     teacher=request.user.teacher
-    teachuser=teacher.name
+    teachuser=request.user.username
     studreq = [i for i in StudentRequest.objects.all() if i.teacher==teacher]
     students = [i for i in Student.objects.all() if i.teacher == teacher]
     return render(request,'teacherview.html', {'msg':msg, 'students':students,'teacheruser':teachuser,'studreq':studreq})
@@ -131,7 +131,7 @@ def deletestudent(request,id):
 def teach_cert(request):
     teacher = Teacher.objects.get(user=request.user)
     students = Student.objects.filter(teacher=teacher)
-    teachuser= teacher.name
+    teachuser= request.user.username
     sort_by = request.GET.get('sort_by')
     if sort_by == 'name':
         students = students.order_by('name')
@@ -147,7 +147,7 @@ def student_activities(request, student_id):
     # Retrieve the student's activities
     student = get_object_or_404(Student, id=student_id)
     teacher = Teacher.objects.get(user=request.user)
-    teacheruser =teacher.name
+    teacheruser =request.user.username
     activities = Activity.objects.filter(student=student,approved_status=True)
     sort_by = request.GET.get('sort_by')
     if sort_by == 'name':
@@ -209,12 +209,13 @@ def studvw(request):
     elif sort_by == 'points':
         activities = activities.order_by('-points_obtained')
 
-    return render(request,'studentview.html',{'student':student,'certificates':activities})
+    return render(request,'studentview.html',{'student':student,'certificates':activities,'studuser':studuser})
 
 @authenticated_student
 @login_required(login_url='/login')
 def upcert(request):
     msg=None
+    studuser = request.user
     if request.method == 'POST':
         form= AddActivity(request.POST,request.FILES)
         if form.is_valid():
@@ -243,7 +244,7 @@ def upcert(request):
             print("failed")
     else:
         form = AddActivity()
-    return render(request,'studentcert.html',{'msg':msg, 'form': form})
+    return render(request,'studentcert.html',{'msg':msg, 'form': form,'studuser':studuser})
 
 def load_sub(request):
     category_id = request.GET.get('category_id')
@@ -268,7 +269,7 @@ def update_student(request):
         form = studentUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
             username = form.cleaned_data.get('username')
-            regno = form.cleaned_data.get('regno')
+            regno = form.cleaned_data.get('regno').lower()
             name = form.cleaned_data.get('name')
             new_password = form.cleaned_data.get('new_password')
             confirm_password =  form.cleaned_data.get('confirm_password')
@@ -282,11 +283,16 @@ def update_student(request):
                 student.save()
                 msgname = "Name updated"
                 print("msgname:", msgname)
-            if regno is not None and name.strip():
-                student = Student.objects.get(user=request.user)
-                student.regno = regno
-                student.save()
-                msgreg = 'Reg no updated'
+            if regno is not None and regno.strip():
+                print("trying reg")
+                existing_student = Student.objects.filter(regno=regno).first()
+                if existing_student:
+                    msgreg="This register number is already in use."
+                else:
+                    student = Student.objects.get(user=request.user)
+                    student.regno = regno
+                    student.save()
+                    msgreg = 'Reg no updated'
             if new_password:
                 if new_password != confirm_password:
                     msgpass= 'passwords dont match'
@@ -296,5 +302,5 @@ def update_student(request):
                     user.save() 
     else:
         form = studentUpdateForm(instance=request.user)
-    print("msgname:", msgname)
+    print("msgreg:", msgreg)
     return render(request, 'update_student.html', {'form': form, 'student': studuser,'msguser':msguser,'msgreg':msgreg, 'msgpass':msgpass,'msgname':msgname})

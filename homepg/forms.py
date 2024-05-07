@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 from .models import CustomUser, Student, Category, Subcategory, Activity, Level
 
 class CustomUserCreationForm(UserCreationForm):
@@ -25,7 +26,7 @@ class CustomUserCreationForm(UserCreationForm):
             }
         )
     )
-    regno = forms.CharField(max_length=20)
+    regno = forms.CharField(max_length=20,validators=[RegexValidator(regex=r'^(aik|AIK)\d{2}(cs|CS)\d{3}$',message='Enter a valid registration number.')])
     batch = forms.ChoiceField(choices=[('9', '9'), ('10', '10'), ('11', '11'), ('12-a', '12-a'),('12-b', '12-b')],initial='')
 
     class Meta:
@@ -77,7 +78,7 @@ class studentUpdateForm(forms.ModelForm):
     new_password = forms.CharField(required=False, widget=forms.PasswordInput)
     confirm_password = forms.CharField(required=False, widget=forms.PasswordInput)
     name=forms.CharField(required=False,initial='')
-    regno= forms.CharField(required=False,initial='')
+    regno= forms.CharField(required=False,initial='',validators=[RegexValidator(regex=r'^(aik|AIK)\d{2}(cs|CS)\d{3}$',message='Enter a valid registration number.')])
 
     class Meta:
         model = User

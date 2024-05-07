@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, RegexValidator
 
 class CustomUser(AbstractUser):
     role=(
@@ -31,11 +31,17 @@ class Student(models.Model):
         ('12-a','12-a'),
         ('12-b','12-b'))
     name = models.CharField(max_length=100)
-    regno = models.CharField(max_length=20,null=True,unique=True)
+    regno = models.CharField(max_length=10,blank=True,null=False,unique=True,validators=[RegexValidator(regex=r'^(aik|AIK)\d{2}(cs|CS)\d{3}$',message='Enter a valid registration number.')] )
     batch = models.CharField(choices=batches,default='9',max_length=10)
     points = models.IntegerField(default=0)
     teacher = models.ForeignKey(Teacher,default=None,on_delete=models.SET_DEFAULT,null=True,blank=True)
     user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        if self.regno:
+            self.regno = self.regno.lower()  # Convert regno to lowercase before saving
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return(self.name)
@@ -48,12 +54,17 @@ class StudentRequest(models.Model):
         ('12-a','12-a'),
         ('12-b','12-b'))
     name = models.CharField(max_length=100)
-    regno = models.CharField(max_length=20,null=True,unique=True)
+    regno = models.CharField(max_length=20,blank=True,null=False,unique=True,validators=[RegexValidator(regex=r'^(aik|AIK)\d{2}(cs|CS)\d{3}$',message='Enter a valid registration number.')])
     batch = models.CharField(choices=batches,default='9',max_length=10)
     points = models.IntegerField(default=0)
     teacher = models.ForeignKey(Teacher,default=None,on_delete=models.SET_DEFAULT,null=True,blank=True)
     user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     
+    def save(self, *args, **kwargs):
+        if self.regno:
+            self.regno = self.regno.lower()  # Convert regno to lowercase before saving
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return(self.name)
 

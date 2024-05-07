@@ -21,7 +21,7 @@ class Command(BaseCommand):
                 else:
                     # Assuming your CSV file has data in the format: username, email, password, student_name, points
                     username = row[0]
-                    regno = row[1]
+                    regno = row[1].lower()
                     batch = row[2]
                     password = row[3]
                     

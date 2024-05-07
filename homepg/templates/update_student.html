@@ -61,31 +61,19 @@
                                         <div class="mb-3">
                                             <label for="{{ form.username.id_for_label }}">Username:</label>
                                             <input type="text" id="{{ form.username.id_for_label }}" name="{{ form.username.html_name }}" class="form-control" value="{{ form.username.value }}">
-                                            {% if form.username.errors %}
-                                                <div class="invalid-feedback">
-                                                    {{ form.username.errors|join:", " }}
-                                                </div>
-                                            {% endif %}
+                                            {{form.username.errors}}
                                             {% if msguser%}{{msguser}}{% endif %}
                                         </div>
                                         <div class="mb-3">
                                             <label for="{{ form.name.id_for_label }}">Name:</label>
                                             <input type="text" id="{{ form.name.id_for_label }}" name="{{ form.name.html_name }}" class="form-control" value="{{ form.name.value }}">
-                                            {% if form.name.errors %}
-                                                <div class="invalid-feedback">
-                                                    {{ form.name.errors|join:", " }}
-                                                </div>
-                                            {% endif %}
+                                            {{form.name.errors}}
                                             {% if msgname%} {{msgname}} {% endif %}
                                         </div>
                                         <div class="mb-3">
                                             <label for="{{ form.regno.id_for_label }}">Reg No:</label>
                                             <input type="text" id="{{ form.regno.id_for_label }}" name="{{ form.regno.html_name }}" class="form-control" value="{{ form.regno.value }}">
-                                            {% if form.regno.errors %}
-                                                <div class="invalid-feedback">
-                                                    {{ form.regno.errors|join:", " }}
-                                                </div>
-                                            {% endif %}
+                                            {{form.regno.errors}}
                                             {% if msgreg %}{{msgreg}}{% endif %}
                                         </div>
                                         <div class="mb-3">
