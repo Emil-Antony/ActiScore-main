@@ -19,5 +19,8 @@ urlpatterns = [
     path('teacher/update_details',views.update_teacher,name='update_teacher'),
     path('student/update_details',views.update_student,name='update_student'),
     path('view_notifications/',views.view_notif,name='view_notif'),
-    path('delete_notifications/<int:id>',views.notif_delete,name='notif_delete')
+    path('delete_notifications/<int:id>',views.notif_delete,name='notif_delete'),
+    path('approveactivity/<int:id>',views.approve_activities,name='approve_activity'),
+    path('deleteactivity/<int:id>',views.delete_activity,name='delete_activity'),
+    
 ]   

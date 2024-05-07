@@ -129,6 +129,44 @@ def deletestudent(request,id):
 
 @authenticated_teacher
 @login_required(login_url='/login')
+def approve_activities(request,id):
+    act_request= Activity.objects.get(id=id)
+    student_activities = Activity.objects.filter(student=act_request.student, level__subcategory=act_request.level.subcategory)
+    total_points = student_activities.aggregate(total_points=Sum('points_obtained'))['total_points'] or 0
+    newpoints = total_points + act_request.level.points_awarded
+    if newpoints>act_request.level.subcategory.max:
+        added= newpoints-act_request.level.subcategory.max
+    else:
+        added=act_request.level.points_awarded
+    print("added: "+str(added))
+    student = act_request.student
+    student.points= student.points+added
+    student.save()
+    print("newtotal: "+str(act_request.student.points+added))
+    act_request.approved_status=True
+    act_request.points_obtained=added
+    act_request.save()
+    stud = act_request.student.user
+    msghead = "Activity Request Approved"
+    msgbody = "Your activity "+str(act_request.name)+" for "+str(act_request.level.subcategory)+ " was approved and was awarded "+str(added)+" points."
+    notif = Notif.objects.create(head=msghead,body=msgbody,user=stud)
+    notif.save()
+    return redirect('activityvw')
+
+@authenticated_teacher
+@login_required(login_url='/login')
+def delete_activity(request,id):
+    act_request = Activity.objects.get(id=id)
+    stud = act_request.student.user
+    msghead = "Activity Request rejected"
+    msgbody = "Your activity "+str(act_request.name)+" for "+str(act_request.level.subcategory)+ " was Rejected."
+    notif = Notif.objects.create(head=msghead,body=msgbody,user=stud)
+    notif.save()
+    act_request.delete()
+    return redirect('activityvw')
+
+@authenticated_teacher
+@login_required(login_url='/login')
 def teach_cert(request):
     teacher = Teacher.objects.get(user=request.user)
     students = Student.objects.filter(teacher=teacher)
@@ -309,7 +347,7 @@ def update_student(request):
 @authenticated_teacher
 @login_required(login_url='/login')
 def approve_activity(request):
-
+    teachuser = request.user
     students = Student.objects.filter(teacher=Teacher.objects.get(user=request.user))
     # Using Q objects so we can use logical OR
     # See https://docs.djangoproject.com/en/5.0/topics/db/queries/#complex-lookups-with-q-objects
@@ -320,24 +358,19 @@ def approve_activity(request):
 
     activities = Activity.objects.filter(qobj, approved_status=False)
 
-    if request.method == 'POST':
-        for activity in activities:
-            if request.POST.get(f"{activity.id}"):
-                activity.approved_status = True
-                activity.save()
-                break
 
-    return render(request, 'approve_activities.html', { 'activities' : activities })
+    return render(request, 'approve_activities2.html', { 'activities' : activities ,'teachuser':teachuser})
 
 
 @login_required(login_url='/login')
 def view_notif(request):
     user = request.user
     notifs = Notif.objects.filter(user=user)
-    if user.roles == 'student':
-        return render(request,'view_notif.html',{'user':user,'notifs':notifs})
-    else:
-        return render(request,'view_notif2.html',{'user':user,'notifs':notifs})
+    return render(request,'view_notif.html',{'user':user,'notifs':notifs})
+    # if user.roles == 'student':
+    #     return render(request,'view_notif.html',{'user':user,'notifs':notifs})
+    # else:
+    #     return render(request,'view_notif2.html',{'user':user,'notifs':notifs})
 
 def notif_delete(request,id):
     notification = get_object_or_404(Notif, id=id)

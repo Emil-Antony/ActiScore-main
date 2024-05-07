@@ -64,21 +64,21 @@
 			function addEventListeners(elements) {
 				let btnclass = "activity";
 				let rowclass = "row";
-
+		
 				elements.forEach(function(item, index) {
 					// Event listener to show rows extra details when button clicked
 					$(`#${btnclass}${item}`).bind('click', function () {
 						if ($(`#${rowclass}${item}`).css('display') == 'none') {
-							$(`#${rowclass}${item}`).css('display') == '';
-							$(`#hiddenrow`).css('display') == '';
+							$(`#${rowclass}${item}`).css('display', '');
+							$(`#hiddenrow`).css('display', '');
 						} else {
-							$(`#${rowclass}${item}`).css('display') == 'none';
-							$(`#hiddenrow`).css('display') == 'none';
+							$(`#${rowclass}${item}`).css('display', 'none');
+							$(`#hiddenrow`).css('display', 'none');
 						}
-					}
-				}
+					});
+				});
 			}
-
+		
 			addEventListeners(elements);
 		</script>
 	</body>

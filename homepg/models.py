@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+import os
 
 class CustomUser(AbstractUser):
     role=(
@@ -108,7 +109,16 @@ class Activity(models.Model):
     points_obtained = models.IntegerField(default=0)
     # additional_obtained = models.IntegerField(default=0)
     # achievement = models.ForeignKey(Achievement,default=None,blank=True, on_delete=models.CASCADE)
-
+    def delete(self, *args, **kwargs):
+        # Delete the associated certificate file from the filesystem
+        if self.certificate:
+            # Get the file path
+            certificate_path = self.certificate.path
+            # Delete the file if it exists
+            if os.path.exists(certificate_path):
+                os.remove(certificate_path)
+        # Call the superclass delete method to delete the Activity instance
+        super().delete(*args, **kwargs)
     def __str__(self):
         return self.name
 
