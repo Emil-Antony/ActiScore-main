@@ -93,10 +93,13 @@ class Level(models.Model):
     def __str__(self):
         return f"Level {self.levelname} for {self.subcategory}"
 
-# class Achievement(models.Model):
-#     level = models.CharField(max_length=100)
-#     subcategory = models.ForeignKey(Subcategory, on_delete=models.CASCADE)
-#     additional_max=models.IntegerField(default=0)
+class Achievement(models.Model):
+    prize = models.CharField(max_length=20)
+    level = models.ManyToManyField(Level,related_name='achievements')
+    points_awarded=models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.prize} for {', '.join(str(level) for level in self.level.all())}"
 
 class Activity(models.Model):
     name = models.CharField(max_length=100)
@@ -107,8 +110,8 @@ class Activity(models.Model):
     certificate = models.FileField(upload_to='certificates/',default=None,blank=True)
     student = models.ForeignKey(Student,on_delete=models.CASCADE,blank=True,default=None)
     points_obtained = models.IntegerField(default=0)
-    # additional_obtained = models.IntegerField(default=0)
-    # achievement = models.ForeignKey(Achievement,default=None,blank=True, on_delete=models.CASCADE)
+    additional_obtained = models.IntegerField(default=0)
+    achievement = models.ForeignKey(Achievement,default=None,blank=True,null=True, on_delete=models.CASCADE)
     def delete(self, *args, **kwargs):
         # Delete the associated certificate file from the filesystem
         if self.certificate:

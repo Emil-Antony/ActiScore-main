@@ -95,18 +95,25 @@
                                                 <div class="card card-body">
                                                     <div class="row">
                                                         <div class="col">
-                                                            <p><strong>Level:</strong> {{ request.level.levelname }}</p>
+                                                            <p><strong>Level: </strong> {{ request.level.levelname }}</p>
                                                         </div>
                                                         <div class="col">
-                                                            <p><strong>Points to give:</strong> {{request.level.points_awarded}}</p>
+                                                            <p><strong>Achievement: </strong> {{request.achievement.prize}}</p>
+                                                        </div>
+                                                        <div class="col">
+                                                            <p><strong>Points to give: </strong>{% if request.achievement %}
+                                                                {{ request.level.points_awarded|add:request.achievement.points_awarded }}
+                                                            {% else %}
+                                                                {{ request.level.points_awarded }}
+                                                            {% endif %}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col">
-                                                            <p><strong>Start Date:</strong> {{ request.start_date }}</p>
+                                                            <p><strong>Start Date: </strong> {{ request.start_date }}</p>
                                                         </div>
                                                         <div class="col">
-                                                            <p><strong>End Date:</strong> {{ request.end_date }}</p>
+                                                            <p><strong>End Date: </strong> {{ request.end_date }}</p>
                                                         </div>
                                                     </div>
                                                     <div class="row">

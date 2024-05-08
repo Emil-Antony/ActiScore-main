@@ -1,15 +1,16 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
 from django.template import loader
-from .forms import CustomUserCreationForm,LoginForm, AddActivity, teacherUpdateForm, studentUpdateForm
+from .forms import CustomUserCreationForm,LoginForm, AddActivity, teacherUpdateForm, studentUpdateForm,addTeacherForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Teacher, Student, StudentRequest, Activity, Subcategory, Level, Notif
+from .models import Teacher, Student, StudentRequest, Activity, Subcategory, Level, Notif, Achievement, CustomUser
 from django.contrib.auth.decorators import login_required,permission_required
 from django.db import IntegrityError
-from .decorators import unauthenticated_user, authenticated_student, authenticated_teacher
-from django.db.models import Sum
+from .decorators import unauthenticated_user, authenticated_student, authenticated_teacher,authenticated_admin
+from django.db.models import Sum, Case,When,Value,CharField
 from django.db.models import Q
+from django.contrib.staticfiles import finders
 
 class DuplicateRegNoError(Exception):
     def __init__(self, message):
@@ -65,7 +66,10 @@ def loginvw(request):
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
-                    if user.verified == False:
+                    if user.is_superuser:
+                        login(request, user)
+                        return redirect('adminvw')
+                    elif user.verified == False:
                         msg='Account has not been approved yet'
                     else:
                         login(request, user)
@@ -99,7 +103,6 @@ def teachvw(request):
     return render(request,'teacherview.html', {'msg':msg, 'students':students,'teacheruser':teachuser,'studreq':studreq})
 
 @authenticated_teacher
-@permission_required('homepg.add_student', raise_exception=True)
 @login_required(login_url='/login')
 def addstudent(request,id):
     stud_request = StudentRequest.objects.get(id=id)
@@ -119,7 +122,6 @@ def addstudent(request,id):
     return redirect('teachvw')
 
 @authenticated_teacher
-@permission_required('homepg.delete_studentrequest', raise_exception=True)
 @login_required(login_url='/login')
 def deletestudent(request,id):
     stud_request = StudentRequest.objects.get(id=id)
@@ -138,6 +140,9 @@ def approve_activities(request,id):
         added= newpoints-act_request.level.subcategory.max
     else:
         added=act_request.level.points_awarded
+    additional = act_request.achievement.points_awarded
+    act_request.additional_obtained=additional
+    added=added+additional
     print("added: "+str(added))
     student = act_request.student
     student.points= student.points+added
@@ -158,7 +163,7 @@ def approve_activities(request,id):
 def delete_activity(request,id):
     act_request = Activity.objects.get(id=id)
     stud = act_request.student.user
-    msghead = "Activity Request rejected"
+    msghead = "Activity Request Rejected"
     msgbody = "Your activity "+str(act_request.name)+" for "+str(act_request.level.subcategory)+ " was Rejected."
     notif = Notif.objects.create(head=msghead,body=msgbody,user=stud)
     notif.save()
@@ -260,9 +265,11 @@ def upcert(request):
         if form.is_valid():
             print("success")
             activityreq = form.save(commit=False)
+            achievementchoice= form.cleaned_data.get('achievementchoice')
             curruser = request.user
             currstudent = Student.objects.get(user=curruser)
             subc = activityreq.level.subcategory
+            actlev= activityreq.level
             print(subc.name)
             
             student_activities = Activity.objects.filter(student=currstudent, level__subcategory=subc)
@@ -273,6 +280,16 @@ def upcert(request):
             print("Max points allowed :", subc.max)
             if subc.max > total_points:
                 activityreq.student= currstudent
+                if achievementchoice:
+                    print("achievment: " +achievementchoice)
+                    achieve = Achievement.objects.filter(prize= achievementchoice,level__in=[actlev])
+                    if achieve.exists():
+                        activityreq.achievement = achieve.first()
+                        print('Achieve:' +str(achieve))
+                    else:
+                        print("Achievement not found")
+                        msg = "Achievement not found"
+                        return render(request,'studentcert.html',{'msg':msg, 'form': form,'studuser':studuser})
                 activityreq.save()
                 msg= "successfully uploaded"
             else:
@@ -357,6 +374,7 @@ def approve_activity(request):
         qobj = qobj | Q(student=i)
 
     activities = Activity.objects.filter(qobj, approved_status=False)
+    
 
 
     return render(request, 'approve_activities2.html', { 'activities' : activities ,'teachuser':teachuser})
@@ -376,4 +394,77 @@ def notif_delete(request,id):
     notification = get_object_or_404(Notif, id=id)
     notification.delete()
     return redirect('view_notif')
-    
+
+@authenticated_admin
+@login_required(login_url='/login')
+def adminvw(request):
+    user=request.user
+    teachers = Teacher.objects.all().order_by(
+        Case(
+            When(batch='9', then=Value(1)),
+            When(batch='10', then=Value(2)),
+            When(batch='11', then=Value(3)),
+            When(batch='12-a', then=Value(4)),
+            When(batch='12-b', then=Value(5)),
+            default=Value(6),
+            output_field=CharField(),
+        )
+    )
+    return render(request,'adminview.html',{'user':user,'teachers':teachers})
+
+@authenticated_admin
+@login_required(login_url='/login')
+def student_listing(request,id):
+    user=request.user
+    teacher= Teacher.objects.get(id=id)
+    students=Student.objects.filter(teacher=teacher)
+    sort_by = request.GET.get('sort_by')
+    if sort_by == 'name':
+        students = students.order_by('name')
+    elif sort_by == 'regno':
+        students = students.order_by('regno')
+    elif sort_by == 'points':
+        students = students.order_by('-points')
+    return render(request, 'student_listing.html',{'students': students,'user':user,'teacher':teacher})
+
+@authenticated_admin
+@login_required(login_url='/login')
+def addtch(request):
+    msg = None
+    user=request.user
+    if request.method == 'POST':
+        form = addTeacherForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.roles='teacher'
+            msg = 'User Created Successfully'
+            name = form.cleaned_data.get('name')
+            batch = form.cleaned_data.get('batch')
+            existing_teacher= Teacher.objects.filter(batch=batch)
+            if existing_teacher:
+                msg="A teacher already exists for this batch."
+                return render(request, 'addteach.html', {'form': form, 'msg':msg,'user':user})
+            user.save()
+            newteach = Teacher.objects.create(name=name,batch=batch,user=user)
+            newteach.save()
+            students=Student.objects.filter(batch=batch)
+            for i in students:
+                i.teacher= newteach
+                i.save()
+        else:
+            errors = form.errors.as_data()
+            msg = "Form is invalid. Reasons:"
+            for field, error_list in errors.items():
+                for error in error_list:
+                    msg += f"{field}: {error}"
+    else:
+        form = addTeacherForm()
+    return render(request, 'addteach.html', {'form': form, 'msg':msg,'user':user})
+
+@authenticated_admin
+@login_required(login_url='/login')
+def deletetch(request,id):
+    teacherobj = Teacher.objects.get(id=id)
+    userobj = teacherobj.user
+    userobj.delete()
+    return redirect('adminvw')

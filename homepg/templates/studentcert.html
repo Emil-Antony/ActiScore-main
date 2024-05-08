@@ -75,8 +75,12 @@
                                     {{ form.subcategory }}
                                 </div> -->
                                 <div class="mb-3">
-                                    <label for="id_levelsel" class="form-label">Category</label>
+                                    <label for="id_level" class="form-label">Category</label>
                                     {{ form.level }}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="id_achievementchoice" class="form-label">Achievement</label>
+                                    {{ form.achievementchoice }}
                                 </div>
                                 <div class="mb-3">
                                     <label for="id_start_date" class="form-label">Start Date</label>
@@ -96,6 +100,9 @@
                               {% if msg %}
                                 <p>{{ msg }}</p>
                               {% endif %}
+                              <div class="text-center mt-4">
+                                <a href="{% static 'pdfs/act.pdf' %}"class="btn btn-info" target="_blank">View index for activity points</a>
+                            </div>
                         </div>
                     </div>
                 <!--cards end-->

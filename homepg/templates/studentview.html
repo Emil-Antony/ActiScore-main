@@ -84,6 +84,7 @@
                                         <th  scope="col"> Name</th>
                                         <th  scope="col"> Category</th>
                                         <th  scope="col"> Level</th>
+                                        <th  scope="col"> Achievement</th>
                                         <th  scope="col"> Date</th>
                                         <th  scope="col"> Approved status</th>
                                         <th  scope="col"> Points</th>
@@ -97,6 +98,7 @@
                                             <td >{{ certs.name }}</td>
                                             <td >{{ certs.level.subcategory }}</td>
                                             <td >{{ certs.level.levelname }}</td>
+                                            <td >{{ certs.achievement.prize }}</td>
                                             <td >{{ certs.end_date }}</td>
                                             <td >{% if certs.approved_status %}Yes{% else %}No{% endif %}</td>
                                             <td >{{ certs.points_obtained }}</td>

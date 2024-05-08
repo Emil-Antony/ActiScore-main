@@ -23,22 +23,14 @@
                     </div>
                     <ul class="nav nav-underline nav-fill flex-column mb-sm-auto  align-items-sm-start" id="menu">
                         <li class="nav-item">
-                            <a href="{%url 'teachvw' %}" class="nav-link text-light  align-middle mb-4 ">
+                            <a href="{% url 'adminvw' %}" class="nav-link text-light active align-middle mb-4 ">
                             <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-user-group me-3"></i>Home Page</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="{% url 'teach_cert' %}" class="nav-link text-light px-0 align-middle active mb-4" >
-                             <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-folder-open me-3"></i>Certificates</span> </a>
-
-                        </li>
-                        <li>
-                            <a href="{% url 'activityvw' %}" class="nav-link text-light align-justify mb-4 ">
-                         <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-check me-3"></i>Activity approval</span></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'update_teacher' %}" class="nav-link text-light px-0 align-middle mb-4">
-                             <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-pen me-3"></i>Update info</span> </a>
+                        <li class="nav-item">
+                            <a href="{% url 'addtch' %}" class="nav-link text-light  align-middle mb-4 ">
+                            <span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-plus me-3"></i>Add Teacher</span>
+                            </a>
                         </li>
                     </ul>
                     <a class="btn btn-light  mx-3 mb-5 px-3 " href="{% url 'logout' %}" role="button"><span class="ms-1 d-none d-sm-inline"><i class="fa-solid fa-door-open me-2"></i>LogOut</span></a>
@@ -49,40 +41,47 @@
             <div class="col g-0">
                 <div class="col g-0">
                   <!-- navbar -->
-                    <nav class="navbar sticky-top px-2 py-3" style="background-color:#2196F3 ;color: #FFFFFF; font-family: Helvetica;">
+                    <nav class="navbar sticky-top px-2 py-3" style="background-color:#868049;color: #FFFFFF; font-family: Helvetica;">
                         <div class="container-fluid">
-                            <h2 class="d-flex">My Students</h2>
-                            <h4 class="d-flex">{{ teacheruser }}</h4>
+                            <h2 class="d-flex">Admin Homepage</h2>
+                            <h4 class="d-flex">{{user}}</h4>
                         </div>
                     </nav>
                   <!-- navbar ends -->
-                    <div class="card m-4">
-                        <div class="card-header text-light d-flex justify-content-between" style="background-color: #765eaa; ">
-                        <h4>Select Student</h4>
-                            <div>
-                                <span class="me-2">Sort By:</span>   
-                                <button onclick="sortTable('name') " class="btn btn-light">Name</button>
-                                <button onclick="sortTable('regno')" class="btn btn-light">Regno</button>
-                                <button onclick="sortTable('points')" class="btn btn-light">Points</button>
-                            </div>
+                <div class="card m-4">
+                        <div class="card-header text-light d-flex justify-content-between" style="background-color: #525888; ">
+                        <h4>{{teacher.name}} Students</h4>
+                        <div>
+                            <span class="me-2">Sort By:</span>   
+                            <button onclick="sortTable('name') " class="btn btn-light">Name</button>
+                            <button onclick="sortTable('regno')" class="btn btn-light">Regno</button>
+                            <button onclick="sortTable('points')" class="btn btn-light">Points</button>
+                        </div>
                         </div>
                         <div class="card-body ps-5 overflow-y-auto" style="max-height: 80vh;">
-                            <div class="row text-light">
-                                {% for student in students %}
-                                <div class="col-md-3 mb-4">
-                                    <div class="card w-75">
-                                        <a href="{% url 'student_activities' student.id %}" class="card-link">
-                                            <div class="card-header text-bg-success">
-                                                {{ student.name }}<p> RegNo: {{ student.regno|upper }}<p><span> Points: <span>{{ student.points }}
-                                            </div>
-                                            <div class="card-body d-flex justify-content-center">
-                                                <img src="{% static 'folder-img.png' %}" class="card-img-top" alt="Student Image">
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
+                            <div class="overflow-auto mx-2 "    style="max-height: 80vh;">
+                                <table class="table" id="activity-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th  scope="col"> Name</th>
+                                            <th  scope="col"> Regno</th>
+                                            <th  scope="col"> Batch</th>
+                                            <th  scope="col"> Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for i in students %}
+                                                <tr>
+                                                    <td scope="row">{{ forloop.counter }}</td>
+                                                    <td >{{ i.name }}</td>
+                                                    <td >{{ i.regno }}</td>
+                                                    <td >{{ i.batch }}</td>
+                                                    <td >{{ i.points }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                    </tbody>
+                                </table></div>
                         </div>
                 </div>
             </div>
