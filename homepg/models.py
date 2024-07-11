@@ -91,7 +91,7 @@ class Level(models.Model):
     points_awarded = models.IntegerField(default=0)
     
     def __str__(self):
-        return f"Level {self.levelname} for {self.subcategory}"
+        return f"{self.subcategory} ::  {self.levelname}"
 
 class Achievement(models.Model):
     prize = models.CharField(max_length=20)

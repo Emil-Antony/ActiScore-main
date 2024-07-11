@@ -128,9 +128,10 @@
                       </div>
                 <!--form end-->
                 <!--student listings-->
+                <!-- Student Listing -->
                 <div class="card m-4">
                     <div class="card-header text-white" style="background-color: #2380cd;">
-                      <h4>Student List</h4>
+                        <h4>Student List</h4>
                     </div>
                     <div class="card-body overflow-y-auto" style="max-height: 50vh;">
                         <div class=" mx-2">
@@ -138,19 +139,44 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th  scope="col">Student Name</th>
-                                        <th  scope="col">Register No</th>
-                                        <th  scope="col">Points</th>
+                                        <th>Student Name</th>
+                                        <th>Register No</th>
+                                        <th>Points</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for student in students %}
                                         <tr>
-                                            <td scope="row">{{ forloop.counter }}</td>
-                                            <td >{{ student.name }}</td>
-                                            <td >{{ student.regno|upper }}</td>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ student.name }}</td>
+                                            <td>{{ student.regno|upper }}</td>
                                             <td>{{ student.points }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#DeleteStudentModal{{ student.id }}">
+                                                    Delete
+                                                </button>
+                                            </td>
                                         </tr>
+
+                                        <!-- Modal delete student -->
+                                        <div class="modal fade" id="DeleteStudentModal{{ student.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header text-light" style="background-color: #481a1a;">
+                                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Delete student?</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        The student {{ student.name }} will be moved to requests and deleted from the current list.
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <a href="{% url 'delete_student' student.id %}" class="btn btn-primary">Confirm</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     {% endfor %}
                                 </tbody>
                             </table>

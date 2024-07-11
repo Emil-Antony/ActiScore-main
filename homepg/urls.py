@@ -26,5 +26,6 @@ urlpatterns = [
     path('delete_notifications/<int:id>',views.notif_delete,name='notif_delete'),
     path('approveactivity/<int:id>',views.approve_activities,name='approve_activity'),
     path('deleteactivity/<int:id>',views.delete_activity,name='delete_activity'),
+    path('delete_student/<int:student_id>/', views.delete_student, name='delete_student'),
     
 ]   

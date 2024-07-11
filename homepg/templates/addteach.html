@@ -65,6 +65,10 @@
                                             {{ form.name }}
                                         </div>
                                         <div class="mb-3">
+                                            <label for="id_department" class="form-label">Department</label>
+                                            {{ form.department }}
+                                        </div>
+                                        <div class="mb-3">
                                             <label for="id_batch" class="form-label">Batch</label>
                                             {{ form.batch }}
                                         </div>
@@ -76,7 +80,7 @@
                                             <label for="id_end_date" class="form-label">Confirm Password</label>
                                             {{ form.password2 }}
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                        <button type="submit" class="btn btn-primary mx-auto">Submit</button>
                                     </form>
                                     {% if msg %}
                                     <p>{{ msg }}</p>

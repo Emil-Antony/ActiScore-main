@@ -130,6 +130,23 @@ def deletestudent(request,id):
     return redirect('teachvw')
 
 @authenticated_teacher
+@login_required
+def delete_student(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    StudentRequest.objects.create(
+        name=student.name,
+        regno=student.regno,
+        batch=student.batch,
+        points=student.points,
+        teacher=student.teacher,
+        user=student.user,
+    )
+    student.user.verified = False
+    student.user.save()
+    student.delete()
+    return redirect('teachvw') 
+
+@authenticated_teacher
 @login_required(login_url='/login')
 def approve_activities(request,id):
     act_request= Activity.objects.get(id=id)
@@ -282,7 +299,7 @@ def upcert(request):
                 activityreq.student= currstudent
                 if achievementchoice:
                     print("achievment: " +achievementchoice)
-                    achieve = Achievement.objects.filter(prize= achievementchoice,level__in=[actlev])
+                    achieve = Achievement.objects.filter(prize= achievementchoice,level__in=[actlev])   
                     if achieve.exists():
                         activityreq.achievement = achieve.first()
                         print('Achieve:' +str(achieve))
@@ -366,18 +383,17 @@ def update_student(request):
 def approve_activity(request):
     teachuser = request.user
     students = Student.objects.filter(teacher=Teacher.objects.get(user=request.user))
-    # Using Q objects so we can use logical OR
-    # See https://docs.djangoproject.com/en/5.0/topics/db/queries/#complex-lookups-with-q-objects
-    qobj = Q(student=students[0])
 
-    for i in students[1:]:
-        qobj = qobj | Q(student=i)
-
-    activities = Activity.objects.filter(qobj, approved_status=False)
-    
-
+    if students.exists():
+        qobj = Q(student=students[0])
+        for i in students[1:]:
+            qobj = qobj | Q(student=i)
+        activities = Activity.objects.filter(qobj, approved_status=False)
+    else:
+        activities = Activity.objects.none()  # No activities if there are no students
 
     return render(request, 'approve_activities2.html', { 'activities' : activities ,'teachuser':teachuser})
+
 
 
 @login_required(login_url='/login')
@@ -385,10 +401,6 @@ def view_notif(request):
     user = request.user
     notifs = Notif.objects.filter(user=user)
     return render(request,'view_notif.html',{'user':user,'notifs':notifs})
-    # if user.roles == 'student':
-    #     return render(request,'view_notif.html',{'user':user,'notifs':notifs})
-    # else:
-    #     return render(request,'view_notif2.html',{'user':user,'notifs':notifs})
 
 def notif_delete(request,id):
     notification = get_object_or_404(Notif, id=id)
@@ -431,26 +443,35 @@ def student_listing(request,id):
 @login_required(login_url='/login')
 def addtch(request):
     msg = None
-    user=request.user
+    user = request.user
     if request.method == 'POST':
         form = addTeacherForm(request.POST)
         if form.is_valid():
+            password1 = form.cleaned_data.get('password1')
+            password2 = form.cleaned_data.get('password2')
+            if password1 != password2:
+                msg = "Passwords do not match."
+                return render(request, 'addteach.html', {'form': form, 'msg': msg, 'user': user})
+
             user = form.save(commit=False)
-            user.roles='teacher'
-            msg = 'User Created Successfully'
+            user.set_password(password1)  # Set the password for the user
+            user.roles = 'teacher'
+            user.verified = True  # Set verified status to True
             name = form.cleaned_data.get('name')
             batch = form.cleaned_data.get('batch')
-            existing_teacher= Teacher.objects.filter(batch=batch)
-            if existing_teacher:
-                msg="A teacher already exists for this batch."
-                return render(request, 'addteach.html', {'form': form, 'msg':msg,'user':user})
+            existing_teacher = Teacher.objects.filter(batch=batch)
+            if existing_teacher.exists():
+                msg = "A teacher already exists for this batch."
+                return render(request, 'addteach.html', {'form': form, 'msg': msg, 'user': user})
+
             user.save()
-            newteach = Teacher.objects.create(name=name,batch=batch,user=user)
+            newteach = Teacher.objects.create(name=name, batch=batch, user=user)
             newteach.save()
-            students=Student.objects.filter(batch=batch)
+            students = Student.objects.filter(batch=batch)
             for i in students:
-                i.teacher= newteach
+                i.teacher = newteach
                 i.save()
+            msg = 'User Created Successfully'
         else:
             errors = form.errors.as_data()
             msg = "Form is invalid. Reasons:"
@@ -459,7 +480,7 @@ def addtch(request):
                     msg += f"{field}: {error}"
     else:
         form = addTeacherForm()
-    return render(request, 'addteach.html', {'form': form, 'msg':msg,'user':user})
+    return render(request, 'addteach.html', {'form': form, 'msg': msg, 'user': user})
 
 @authenticated_admin
 @login_required(login_url='/login')

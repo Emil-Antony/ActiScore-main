@@ -28,7 +28,6 @@
 				</thead>
 				<tbody>
 					{% for activity in activities %}
-					<!-- https://stackoverflow.com/questions/18519109/how-to-concatenate-a-string-to-a-number-inside-a-template-tag-in-django -->
 					{% with activity.id|stringformat:"s" as activityidstr %}
 					<tr>
 						<th scope="row">{{ activity.name }}</th>

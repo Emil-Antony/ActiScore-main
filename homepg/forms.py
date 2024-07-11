@@ -28,6 +28,7 @@ class CustomUserCreationForm(UserCreationForm):
     )
     regno = forms.CharField(max_length=20,validators=[RegexValidator(regex=r'^(aik|AIK)\d{2}(cs|CS)\d{3}$',message='Enter a valid registration number.')])
     batch = forms.ChoiceField(choices=[('9', '9'), ('10', '10'), ('11', '11'), ('12-a', '12-a'),('12-b', '12-b')],initial='')
+    department = forms.ChoiceField(choices=[('CSE','CSE')], initial='')
 
     class Meta:
         model=CustomUser
@@ -107,6 +108,7 @@ class addTeacherForm(forms.ModelForm):
             }
         )
     )
+    department = forms.ChoiceField(choices=[('CSE','CSE')],required=True,widget=forms.Select(attrs={'class': 'form-control'}))
     batch = forms.ChoiceField(choices=[('9', '9'), ('10', '10'), ('11', '11'), ('12-a', '12-a'),('12-b', '12-b')],required=True,
                                     widget=forms.Select(attrs={'class': 'form-control'}))
     name = forms.CharField(required=True,initial='',widget=forms.TextInput(attrs={'class': 'form-control'}))
